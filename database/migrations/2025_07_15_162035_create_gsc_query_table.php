@@ -8,9 +8,9 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('gsc_qsha_oh', function (Blueprint $table) {
+        Schema::create('gsc_query', function (Blueprint $table) {
             $table->id();
-            $table->string('page_url');
+            $table->string('query_keyword');
             $table->integer('total_impressions')->default(0);
             $table->integer('total_clicks')->default(0);
             $table->float('avg_ctr')->default(0); // 例: 0.1234 → 12.34%

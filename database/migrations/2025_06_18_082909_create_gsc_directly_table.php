@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('gsc_qsha_oh_maker', function (Blueprint $table) {
+        Schema::create('gsc_directly', function (Blueprint $table) {
             $table->id();
             $table->string('page_url');
             $table->integer('total_impressions')->default(0);
