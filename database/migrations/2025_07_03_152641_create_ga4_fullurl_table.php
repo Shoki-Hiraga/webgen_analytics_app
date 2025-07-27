@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('ga4_url', function (Blueprint $table) {
+        Schema::create('ga4_fullurl', function (Blueprint $table) {
             $table->id();
             $table->string('landing_url');
             $table->string('session_medium');
