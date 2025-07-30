@@ -39,7 +39,7 @@ def get_landing_urls_from_db():
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        query = "SELECT url FROM ga4_directory_url WHERE is_active = TRUE"
+        query = "SELECT url FROM ga4_directory_listurls WHERE is_active = TRUE"
         cursor.execute(query)
 
         urls = [row[0] for row in cursor.fetchall()]

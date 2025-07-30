@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ga4_media_url_url', function (Blueprint $table) {
+        Schema::create('ga4_fullurl_listurls', function (Blueprint $table) {
             $table->id();
             $table->string('url')->unique();
             $table->boolean('is_active')->default(true);
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ga4_media_url_url');
+        Schema::dropIfExists('ga4_fullurl_url');
     }
 };

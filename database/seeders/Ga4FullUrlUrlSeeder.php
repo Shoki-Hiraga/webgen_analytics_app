@@ -17,7 +17,7 @@ class Ga4FullUrlUrlSeeder extends Seeder
         $urls = require $filePath;
 
         foreach ($urls as $url) {
-            DB::table('ga4_fullurl_url')->updateOrInsert(
+            DB::table('ga4_fullurl_listurls')->updateOrInsert(
                 ['url' => $url],
                 ['is_active' => true, 'created_at' => now(), 'updated_at' => now()]
             );
