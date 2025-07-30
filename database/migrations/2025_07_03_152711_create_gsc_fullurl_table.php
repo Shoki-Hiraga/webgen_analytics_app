@@ -23,6 +23,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('gsc_qsha_oh');
+        Schema::dropIfExists('gsc_fullurl');
     }
 };

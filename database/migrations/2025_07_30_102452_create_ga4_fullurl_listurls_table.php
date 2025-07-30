@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ga4_fullurl_url');
+        Schema::dropIfExists('ga4_fullurl_listurls');
     }
 };

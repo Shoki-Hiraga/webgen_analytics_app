@@ -7,16 +7,16 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('ga4_directory_listurls', function (Blueprint $table) {
+        Schema::create('gsc_query_listqueries', function (Blueprint $table) {
             $table->id();
-            $table->string('url')->unique();
+            $table->string('query')->unique();
             $table->boolean('is_active')->default(true);
-            $table->timestamps(); // created_at, updated_at
+            $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('ga4_directory_listurls');
+        Schema::dropIfExists('gsc_query');
     }
 };

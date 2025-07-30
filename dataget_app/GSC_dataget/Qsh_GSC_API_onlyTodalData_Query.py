@@ -5,12 +5,13 @@ from setting_file.header import *
 from setting_file.setFunc import get_db_config
 from setting_file.Search_Console_set.GSC_dateSet import generate_monthly_date_ranges
 from setting_file.Search_Console_set.GSC_Query_date_Duplicate import record_exists
+# from setting_file.Search_Console_set.GSC_QshQuery import QUERIES
 
 # 対象のサイトURLを指定します
 site_url = 'https://www.qsha-oh.com/'
 
 # JSONファイルのパスを指定
-SERVICE_ACCOUNT_FILE = api_json.qsha_oh_gsc_backup
+SERVICE_ACCOUNT_FILE = api_json.qsha_oh
 
 # Search Console APIの認証情報を指定
 credentials = service_account.Credentials.from_service_account_file(
@@ -35,6 +36,27 @@ def get_db_connection():
         print(f"[CRITICAL DB ERROR] DB接続に失敗しました: {e}")
         traceback.print_exc()
         raise  # エラーを再スローしてメイン処理も止める
+
+# クエリデータ取得
+def get_queries_from_db():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        query = "SELECT query FROM gsc_query_listqueries WHERE is_active = TRUE"
+        cursor.execute(query)
+
+        queries = [row[0] for row in cursor.fetchall()]
+        print(f"[DEBUG] {len(queries)} 件のクエリを取得")
+
+        cursor.close()
+        conn.close()
+        return queries
+
+    except Exception as e:
+        print(f"[DB ERROR] クエリ取得中にエラー: {e}")
+        traceback.print_exc()
+        return []
 
 # 検索クエリに基づくSearch Consoleデータ取得関数
 def get_search_query_data(site_url, keyword):
@@ -94,7 +116,7 @@ def insert_gsc_data(query_keyword, total_impressions, total_clicks, avg_ctr, avg
         traceback.print_exc()
 
 try:
-    from setting_file.Search_Console_set.GSC_QshQuery import QUERIES
+    queries = get_queries_from_db()
     date_ranges = generate_monthly_date_ranges()
 
     for start_date, end_date in date_ranges:
@@ -105,7 +127,7 @@ try:
 
         print(f"\n[INFO] 期間: {set_start_date} ～ {set_end_date}")
 
-        for keyword in QUERIES:
+        for keyword in queries:
             # 重複チェック（クエリ対応に変更が必要）
             if record_exists(keyword, db_start_date, db_end_date):
                 print(f"[SKIP] 既に登録済み: {keyword}, {db_start_date} - {db_end_date}")
