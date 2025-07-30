@@ -5,6 +5,7 @@ from setting_file.header import *
 from setting_file.setFunc import get_db_config
 from setting_file.Search_Console_set.GSC_dateSet import generate_monthly_date_ranges
 from setting_file.Search_Console_set.GSC_date_Duplicate import record_exists
+# from setting_file.Search_Console_set.GSC_QshURL_Maker import URLS
 
 # 対象のサイトURLを指定します
 site_url = 'https://www.qsha-oh.com/'
@@ -35,6 +36,26 @@ def get_db_connection():
         print(f"[CRITICAL DB ERROR] DB接続に失敗しました: {e}")
         traceback.print_exc()
         raise  # エラーを再スローしてメイン処理も止める
+
+def get_urls_from_db():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        query = "SELECT url FROM gsc_fullurl_listurls WHERE is_active = TRUE"
+        cursor.execute(query)
+
+        urls = [row[0] for row in cursor.fetchall()]
+        print(f"[DEBUG] {len(urls)} 件のURLを取得")
+
+        cursor.close()
+        conn.close()
+        return urls
+
+    except Exception as e:
+        print(f"[DB ERROR] URL取得中にエラー: {e}")
+        traceback.print_exc()
+        return []
 
 # 指定したURLに一致したデータを取得する関数を定義します
 def get_search_url_data(site_url, page_url):
@@ -70,7 +91,7 @@ def insert_gsc_data(page_url, total_impressions, total_clicks, avg_ctr, avg_posi
         cursor = conn.cursor()
 
         insert_query = """
-            INSERT INTO gsc_qsha_oh_maker
+            INSERT INTO gsc_fullurl
             (page_url, total_impressions, total_clicks, avg_ctr, avg_position, start_date, end_date, created_at, updated_at)
             VALUES (%s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
         """
@@ -97,9 +118,8 @@ def insert_gsc_data(page_url, total_impressions, total_clicks, avg_ctr, avg_posi
         traceback.print_exc()
 
 try:
-    from setting_file.Search_Console_set.GSC_QshURL_Maker import URLS
     date_ranges = generate_monthly_date_ranges()
-
+    urls = get_urls_from_db()
     for start_date, end_date in date_ranges:
         set_start_date = start_date.strftime("%Y-%m-%d")
         set_end_date = end_date.strftime("%Y-%m-%d")
