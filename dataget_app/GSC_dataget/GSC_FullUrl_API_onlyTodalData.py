@@ -128,7 +128,7 @@ try:
 
         print(f"\n[INFO] 期間: {set_start_date} ～ {set_end_date}")
 
-        for url in URLS:
+        for url in urls:
             # 重複チェック
             if record_exists(url, db_start_date, db_end_date):
                 print(f"[SKIP] 既に登録済み: {url}, {db_start_date} - {db_end_date}")
