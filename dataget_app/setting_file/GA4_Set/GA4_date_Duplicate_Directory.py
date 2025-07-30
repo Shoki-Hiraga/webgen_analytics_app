@@ -9,7 +9,7 @@ def record_exists(landing_url, session_medium, start_date, end_date):
         cursor = conn.cursor()
 
         query = """
-            SELECT COUNT(*) FROM ga4_qsha_oh
+            SELECT COUNT(*) FROM ga4_directly
             WHERE landing_url = %s
               AND session_medium = %s
               AND start_date = %s
