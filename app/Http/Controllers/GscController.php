@@ -3,17 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Ga4QshaOh;
+use App\Models\Gsc;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 
-class Ga4QshaOhController extends Controller
+class GscController extends Controller
 {
     /**
-     * データの一覧を表示
+     * GSCデータの一覧を表示
      */
     public function index(Request $request)
     {
-        $query = Ga4QshaOh::query();
+        $query = Gsc::query();
 
         if ($request->filled('start_month')) {
             $start = Carbon::parse($request->input('start_month'))->startOfMonth();
@@ -27,31 +28,38 @@ class Ga4QshaOhController extends Controller
 
         $records = $query->orderBy('start_date', 'asc')->get();
 
-        // チャート用データ（landing_urlごとにまとめる）
-        $chartDataByUrl = $records->groupBy('landing_url')->map(function ($groupedByUrl) {
+        // チャートデータをページURLごとに月単位でまとめる
+        $chartDataByUrl = $records->groupBy('page_url')->map(function ($groupedByUrl) {
             return $groupedByUrl->groupBy(function ($item) {
                 return $item->start_date->format('Y-m');
             })->map(function ($items, $month) {
+                $impressions = $items->sum('total_impressions');
+                $clicks = $items->sum('total_clicks');
+                $ctr = $impressions > 0 ? round(($clicks / $impressions) * 100, 2) : 0;
+                $position = $items->avg('avg_position');
+
                 return [
                     'month' => $month,
-                    'total_sessions' => $items->sum('total_sessions'),
-                    'cv_count' => $items->sum('cv_count'),
+                    'impressions' => $impressions,
+                    'clicks' => $clicks,
+                    'ctr' => $ctr,
+                    'position' => round($position, 2),
                 ];
             })->values();
         });
 
-        return view('main.ga4_index', compact('records', 'chartDataByUrl'));
+        return view('main.gsc_index', compact('records', 'chartDataByUrl'));
     }
 
-    /**
-     * ランディングURLごとのデータ表示
-     */
+
     public function showByDirectory(Request $request)
     {
         $path = $request->path();
         $directory = '/' . last(explode('/', $path)) . '/';
+        $baseUrl = 'https://www.qsha-oh.com';
+        $fullUrl = $baseUrl . $directory;
 
-        $query = Ga4QshaOh::where('landing_url', $directory);
+        $query = Gsc::where('page_url', $fullUrl);
 
         if ($request->filled('start_month')) {
             $start = Carbon::parse($request->input('start_month'))->startOfMonth();
@@ -65,23 +73,29 @@ class Ga4QshaOhController extends Controller
 
         $records = $query->orderBy('start_date', 'asc')->get();
 
-        // chartDataByUrl を1件分でも生成する（同じ構造）
-        $chartDataByUrl = collect([$directory => $records->groupBy(function ($item) {
-            return $item->start_date->format('Y-m');
-        })->map(function ($items, $month) {
-            return [
-                'month' => $month,
-                'total_sessions' => $items->sum('total_sessions'),
-                'cv_count' => $items->sum('cv_count'),
-            ];
-        })->values()]);
+        // ✅ この1行がポイント
+        $chartDataByUrl = $records->groupBy('page_url')->map(function ($groupedByUrl) {
+            return $groupedByUrl->groupBy(function ($item) {
+                return $item->start_date->format('Y-m');
+            })->map(function ($items, $month) {
+                $impressions = $items->sum('total_impressions');
+                $clicks = $items->sum('total_clicks');
+                $ctr = $impressions > 0 ? round(($clicks / $impressions) * 100, 2) : 0;
+                $position = $items->avg('avg_position');
 
-        return view('main.ga4_index', compact('records', 'directory', 'chartDataByUrl'));
+                return [
+                    'month' => $month,
+                    'impressions' => $impressions,
+                    'clicks' => $clicks,
+                    'ctr' => $ctr,
+                    'position' => round($position, 2),
+                ];
+            })->values();
+        });
+
+        return view('main.gsc_index', compact('records', 'directory', 'chartDataByUrl'));
     }
 
-    /**
-     * 前年同月比
-     */
     public function yoy(Request $request)
     {
         $baseDate = Carbon::parse($request->input('date', now()));
@@ -91,12 +105,9 @@ class Ga4QshaOhController extends Controller
             $baseDate->copy()->subYear()->endOfMonth()
         );
 
-        return view('main.ga4_yoy', compact('thisYear', 'lastYear', 'baseDate'));
+        return view('main.gsc_yoy', compact('thisYear', 'lastYear', 'baseDate'));
     }
 
-    /**
-     * 前月比
-     */
     public function mom(Request $request)
     {
         $baseDate = Carbon::parse($request->input('date', now()));
@@ -106,15 +117,12 @@ class Ga4QshaOhController extends Controller
             $baseDate->copy()->subMonth()->endOfMonth()
         );
 
-        return view('main.ga4_mom', compact('thisMonth', 'lastMonth', 'baseDate'));
+        return view('main.gsc_mom', compact('thisMonth', 'lastMonth', 'baseDate'));
     }
 
-    /**
-     * 共通の集計処理
-     */
     private function getRecords($start, $end)
     {
-        return Ga4QshaOh::whereBetween('start_date', [$start, $end])
+        return Gsc::whereBetween('start_date', [$start, $end])
             ->orderBy('start_date', 'desc')
             ->get();
     }

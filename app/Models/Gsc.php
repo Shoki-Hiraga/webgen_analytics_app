@@ -5,18 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Ga4QshaOh extends Model
+class Gsc extends Model
 {
     use HasFactory;
 
-    protected $table = 'ga4_qsha_oh';
+    protected $table = 'gsc_directly';
 
     protected $fillable = [
-        'landing_url',
-        'session_medium',
-        'total_sessions',
-        'cv_count',
-        'cvr',
+        'page_url',
+        'total_impressions',
+        'total_clicks',
+        'avg_ctr',
+        'avg_position',
         'start_date',
         'end_date',
     ];
@@ -24,6 +24,7 @@ class Ga4QshaOh extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
-        'cvr' => 'float',
+        'avg_ctr' => 'float',
+        'avg_position' => 'float',
     ];
 }
