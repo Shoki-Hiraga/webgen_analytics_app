@@ -5,8 +5,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from setting_file.header import *
 from setting_file.setFunc import get_db_config
 from setting_file.GA4_Set.GA4_dateSet import generate_monthly_date_ranges
-from setting_file.GA4_Set.GA4_date_Duplicate import record_exists
-from setting_file.GA4_Set.GA4_QshURL_Historia import URLS
+from setting_file.GA4_Set.GA4_date_Duplicate_Media_Url import record_exists
+# from setting_file.GA4_Set.GA4_QshURL_Historia import URLS
 
 
 SESSION_MEDIUM_FILTER = "organic"
@@ -31,6 +31,26 @@ def get_db_connection():
         print(f"[CRITICAL DB ERROR] DB接続に失敗しました: {e}")
         traceback.print_exc()
         raise  # エラーを再スローしてメイン処理も止める
+
+def get_landing_urls_from_db():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        query = "SELECT url FROM ga4_media_url_url WHERE is_active = TRUE"
+        cursor.execute(query)
+
+        urls = [row[0] for row in cursor.fetchall()]
+        print(f"[DEBUG] {len(urls)} 件のURLを取得")
+
+        cursor.close()
+        conn.close()
+        return urls
+
+    except Exception as e:
+        print(f"[DB ERROR] URL取得中にエラー: {e}")
+        traceback.print_exc()
+        return []
 
 # 全セッション数を取得
 def get_total_sessions_from_landing(landing_url):
@@ -118,7 +138,7 @@ def insert_into_db(landing_url, session_medium, total_sessions, cv_count, cvr, s
         cursor = conn.cursor()
 
         insert_query = """
-            INSERT INTO ga4_qsha_oh_historia
+            INSERT INTO ga4_media_url
             (landing_url, session_medium, total_sessions, cv_count, cvr, start_date, end_date, created_at, updated_at)
             VALUES (%s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
         """
@@ -151,6 +171,7 @@ def insert_into_db(landing_url, session_medium, total_sessions, cv_count, cvr, s
 date_ranges = generate_monthly_date_ranges()
 
 try:
+    URLS = get_landing_urls_from_db()
     print(f"[INFO] 開始 URLS = {URLS}")
     for start_date, end_date in date_ranges:
         set_start_date = start_date.strftime("%Y-%m-%d")

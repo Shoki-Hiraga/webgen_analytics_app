@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             Ga4DirectoryUrlSeeder::class,
             Ga4FullUrlUrlSeeder::class,
+            Ga4MediaUrlUrlSeeder::class,
         ]);
     }
 }
