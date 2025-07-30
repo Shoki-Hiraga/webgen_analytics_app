@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             Ga4FullUrlUrlSeeder::class,
             Ga4MediaUrlUrlSeeder::class,
             GscqueriesSeeder::class,
+            GscMediaUrlUrlSeeder::class,
         ]);
     }
 }
