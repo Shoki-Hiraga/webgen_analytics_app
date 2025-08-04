@@ -46,10 +46,10 @@ class Ga4Controller extends Controller
     /**
      * ランディングURLごとのデータ表示
      */
-    public function showByDirectory(Request $request)
+    public function showByDirectory(Request $request, $target = null)
     {
-        $path = $request->path();
-        $directory = '/' . last(explode('/', $path)) . '/';
+        $target ??= last(explode('/', $request->path()));
+        $directory = '/' . $target . '/';
 
         $query = Ga4::where('landing_url', $directory);
 

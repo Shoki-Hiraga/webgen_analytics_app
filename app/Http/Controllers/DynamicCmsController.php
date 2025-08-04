@@ -32,7 +32,7 @@ class DynamicCmsController extends Controller
             'yoy'   => $controller->yoy($request),
             'mom'   => $controller->mom($request),
             'index' => $controller->index($request),
-            default => $controller->showByDirectory($request),
+            default => $controller->showByDirectory($request, basename($page->slug)),
         };
     }
 
@@ -44,7 +44,7 @@ class DynamicCmsController extends Controller
             'yoy'   => $controller->yoy($request),
             'mom'   => $controller->mom($request),
             'index' => $controller->index($request),
-            default => $controller->showByDirectory($request),
+            default => $controller->showByDirectory($request, basename($page->slug)),
         };
     }
 }

@@ -52,12 +52,11 @@ class GscController extends Controller
     }
 
 
-    public function showByDirectory(Request $request)
+    public function showByDirectory(Request $request, $target = null)
     {
-        $path = $request->path();
-        $directory = '/' . last(explode('/', $path)) . '/';
-        $baseUrl = 'https://www.qsha-oh.com';
-        $fullUrl = $baseUrl . $directory;
+        $target ??= last(explode('/', $request->path())); // fallback
+        $directory = '/' . $target . '/';
+        $fullUrl = 'https://www.qsha-oh.com' . $directory;
 
         $query = Gsc::where('page_url', $fullUrl);
 
