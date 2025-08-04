@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Ga4Controller;
 use App\Http\Controllers\GscController;
+use App\Http\Controllers\DynamicCmsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,3 +40,5 @@ Route::get('/ga4_qsha_oh/mom', [Ga4Controller::class, 'mom'])->name('ga4_qsha_oh
 // GSC YoY & MoM
 Route::get('/gsc_qsha_oh/yoy', [GscController::class, 'yoy'])->name('gsc_qsha_oh.yoy');
 Route::get('/gsc_qsha_oh/mom', [GscController::class, 'mom'])->name('gsc_qsha_oh.mom');
+
+Route::get('/{slug}', [DynamicCmsController::class, 'handle'])->where('slug', '.*');

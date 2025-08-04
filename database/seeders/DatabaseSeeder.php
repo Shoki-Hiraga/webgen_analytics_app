@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             GscMediaUrlUrlSeeder::class,
             GscFullUrlUrlSeeder::class,
             GscDirectoryUrlSeeder::class,
+            SetSlugSeeder::class,
         ]);
     }
 }

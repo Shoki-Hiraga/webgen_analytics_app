@@ -2,72 +2,68 @@
 
 namespace App\Helpers;
 
+use App\Models\SetSlug;
+
 class BreadcrumbHelper
 {
-// TOPのリンク一覧、フッターのリンク一覧
-public static function getLinks(): array
-{
-    return [
-        'GA4' => [
-            'ga4_qsha_oh' => ['name' => 'GA4 一覧', 'url' => route('ga4_qsha_oh')],
-            'ga4_qsha_oh.maker' => ['name' => 'GA4 /maker/', 'url' => route('ga4_qsha_oh.maker')],
-            'ga4_qsha_oh.result' => ['name' => 'GA4 /result/', 'url' => route('ga4_qsha_oh.result')],
-            'ga4_qsha_oh.usersvoice' => ['name' => 'GA4 /usersvoice/', 'url' => route('ga4_qsha_oh.usersvoice')],
-            'ga4_qsha_oh.historia' => ['name' => 'GA4 /historia/', 'url' => route('ga4_qsha_oh.historia')],
-            'ga4_qsha_oh.yoy' => ['name' => 'GA4 YoY比較', 'url' => route('ga4_qsha_oh.yoy')],
-            'ga4_qsha_oh.mom' => ['name' => 'GA4 MoM比較', 'url' => route('ga4_qsha_oh.mom')],
-        ],
-        'GSC' => [
-            'gsc_qsha_oh' => ['name' => 'GSC 一覧', 'url' => route('gsc_qsha_oh')],
-            'gsc_qsha_oh.maker' => ['name' => 'GSC /maker/', 'url' => route('gsc_qsha_oh.maker')],
-            'gsc_qsha_oh.result' => ['name' => 'GSC /result/', 'url' => route('gsc_qsha_oh.result')],
-            'gsc_qsha_oh.usersvoice' => ['name' => 'GSC /usersvoice/', 'url' => route('gsc_qsha_oh.usersvoice')],
-            'gsc_qsha_oh.historia' => ['name' => 'GSC /historia/', 'url' => route('gsc_qsha_oh.historia')],
-            'gsc_qsha_oh.yoy' => ['name' => 'GSC YoY比較', 'url' => route('gsc_qsha_oh.yoy')],
-            'gsc_qsha_oh.mom' => ['name' => 'GSC MoM比較', 'url' => route('gsc_qsha_oh.mom')],
-        ],
-    ];
-}
+    /**
+     * パンくずリストを現在の URL に基づいて生成
+     */
+    public static function generate(): array
+    {
+        $currentSlug = request()->path(); // 例: "ga4_qsha_oh/maker"
+        $page = SetSlug::where('slug', $currentSlug)->where('active', true)->first();
 
-// パンくずリスト
-public static function getFlatLinks(): array
-{
-    return [
-        'ga4_qsha_oh' => ['name' => 'GA4 一覧', 'url' => route('ga4_qsha_oh')],
-        'ga4_qsha_oh.maker' => ['name' => 'GA4 /maker/', 'url' => route('ga4_qsha_oh.maker')],
-        'ga4_qsha_oh.result' => ['name' => 'GA4 /result/', 'url' => route('ga4_qsha_oh.result')],
-        'ga4_qsha_oh.usersvoice' => ['name' => 'GA4 /usersvoice/', 'url' => route('ga4_qsha_oh.usersvoice')],
-        'ga4_qsha_oh.yoy' => ['name' => 'GA4 YoY比較', 'url' => route('ga4_qsha_oh.yoy')],
-        'ga4_qsha_oh.mom' => ['name' => 'GA4 MoM比較', 'url' => route('ga4_qsha_oh.mom')],
+        $breadcrumbs = [];
 
-        'gsc_qsha_oh' => ['name' => 'GSC 一覧', 'url' => route('gsc_qsha_oh')],
-        'gsc_qsha_oh.maker' => ['name' => 'GSC /maker/', 'url' => route('gsc_qsha_oh.maker')],
-        'gsc_qsha_oh.result' => ['name' => 'GSC /result/', 'url' => route('gsc_qsha_oh.result')],
-        'gsc_qsha_oh.usersvoice' => ['name' => 'GSC /usersvoice/', 'url' => route('gsc_qsha_oh.usersvoice')],
-        'gsc_qsha_oh.yoy' => ['name' => 'GSC YoY比較', 'url' => route('gsc_qsha_oh.yoy')],
-        'gsc_qsha_oh.mom' => ['name' => 'GSC MoM比較', 'url' => route('gsc_qsha_oh.mom')],
-    ];
-}
-
-// ② パンくず用
-public static function generate(): array
-{
-    $currentRoute = \Route::currentRouteName();
-    $links = self::getFlatLinks();
-
-    $breadcrumbs = [];
-
-    // 一致するルートを階層的に構築（例: 'ga4_qsha_oh.maker' → ['ga4_qsha_oh', 'ga4_qsha_oh.maker']）
-    $segments = explode('.', $currentRoute);
-    $routeKey = '';
-    foreach ($segments as $segment) {
-        $routeKey = $routeKey ? $routeKey . '.' . $segment : $segment;
-        if (isset($links[$routeKey])) {
-            $breadcrumbs[] = $links[$routeKey];
+        while ($page) {
+            $breadcrumbs[] = [
+                'name' => $page->label,
+                'url'  => url($page->slug),
+            ];
+            $page = $page->parent;
         }
+
+        return array_reverse($breadcrumbs);
     }
 
-    return $breadcrumbs;
-}
+    /**
+     * ナビゲーションやフッター用のリンク一覧（グループ化）
+     */
+    public static function getLinks(): array
+    {
+        return SetSlug::where('active', true)
+            ->orderBy('type')
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy('type') // 例: 'ga4', 'gsc'
+            ->map(function ($items) {
+                return $items->mapWithKeys(function ($item) {
+                    return [
+                        $item->slug => [
+                            'name' => $item->label,
+                            'url'  => url($item->slug),
+                        ],
+                    ];
+                });
+            })->toArray();
+    }
 
+    /**
+     * フラットなリンク一覧（ルート名ベースではなく slug ベース）
+     */
+    public static function getFlatLinks(): array
+    {
+        return SetSlug::where('active', true)
+            ->orderBy('sort_order')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [
+                    $item->slug => [
+                        'name' => $item->label,
+                        'url'  => url($item->slug),
+                    ],
+                ];
+            })->toArray();
+    }
 }
