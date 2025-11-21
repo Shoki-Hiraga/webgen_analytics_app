@@ -66,3 +66,60 @@ ul {
 }
 
 }
+
+/* --------------------------------
+   Custom Pagination (独自)
+-------------------------------- */
+.pagination {
+    margin: 40px auto;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    font-size: 16px;
+    flex-wrap: wrap;
+    max-width: 1000px;
+}
+
+.pagination .page {
+    display: inline-block;
+    padding: 8px 14px;
+    border: 1px solid #ccc;
+    background: #fff;
+    text-decoration: none;
+    color: #0070c9;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+
+.pagination .page:hover {
+    background: #e7f3ff;
+    border-color: #4aa3ff;
+}
+
+/* 現在ページ */
+.pagination .active {
+    background: #0070c9;
+    color: #fff;
+    border-color: #0070c9;
+}
+
+/* 押せないとき */
+.pagination .disabled {
+    background: #eee;
+    color: #aaa;
+    border-color: #ddd;
+    pointer-events: none;
+}
+
+/* スマホ */
+@media screen and (max-width: 768px) {
+    .pagination {
+        gap: 4px;
+        font-size: 14px;
+        max-width: 400px;
+    }
+
+    .pagination .page {
+        padding: 6px 10px;
+    }
+}

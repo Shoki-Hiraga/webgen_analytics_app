@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DynamicCmsController;
+use App\Http\Controllers\SerpOrganicResultController;
+use App\Http\Controllers\AdsKeywordPlannerResultController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -18,5 +21,11 @@ use App\Http\Controllers\DynamicCmsController;
 Route::get('/', function () {
     return view('main.index');
 });
+
+Route::get('/serp-organic-results', [SerpOrganicResultController::class, 'index']);
+Route::get('/serp-organic-results/csv', [SerpOrganicResultController::class, 'csv']);
+
+Route::get('/ads-keyword-planner-results', [AdsKeywordPlannerResultController::class, 'index']);
+Route::get('/ads-keyword-planner-results/csv', [AdsKeywordPlannerResultController::class, 'csv']);
 
 Route::get('/{slug}', [DynamicCmsController::class, 'handle'])->where('slug', '.*');
